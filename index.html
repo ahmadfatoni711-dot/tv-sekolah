@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TV Sekolah</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', sans-serif;
+        background: black;
+        color: white;
+        overflow: hidden;
+    }
+
+    /* OVERLAY */
+    .overlay {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        padding: 18px 28px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
+        box-sizing: border-box;
+    }
+
+    .logo-wrap {
+        width: 96px;
+        height: 96px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.18);
+        border: 2px solid rgba(255,255,255,0.45);
+        box-shadow: 0 10px 24px rgba(0,0,0,0.28);
+        backdrop-filter: blur(4px);
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .datetime {
+        margin-right: 26px;
+        padding: 10px 18px;
+        border-radius: 18px;
+        background: rgba(7, 24, 45, 0.55);
+        box-shadow: 0 10px 22px rgba(0,0,0,0.24);
+        text-align: right;
+    }
+
+    #clock {
+        font-size: 28px;
+        font-weight: bold;
+        color: #f0ed26;
+        letter-spacing: 1px;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.35);
+    }
+
+    #date {
+        font-size: 16px;
+        margin-top: 4px;
+        color: #e4f039;
+        font-weight: 600;
+    }
+
+    #logo {
+        position: static;
+        width: 85%;
+        height: 85%;
+        display: block;
+        object-fit: contain;
+    }
+
+    /* VIDEO / IMAGE */
+    #mainContent {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+   #mainContent video,
+   #mainContent img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 1.4s cubic-bezier(0.22, 1, 0.36, 1),
+                    visibility 0s linear 1.4s;
+        will-change: opacity;
+    }
+
+    #mainContent .is-visible {
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 1.4s cubic-bezier(0.22, 1, 0.36, 1),
+                    visibility 0s linear 0s;
+    }
+
+    #mainContent::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at center, transparent 45%, rgba(0,0,0,0.18) 100%);
+        pointer-events: none;
+    }
+    /* RUNNING TEXT */
+    #runningText {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        background: linear-gradient(to right, #0a6fb3ee, rgba(4, 100, 189, 0.664));
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-top: 1px solid rgba(255,255,255,0.08);
+        color: #ffffff;
+        padding: 10px;
+        font-size: 25px;
+        font-weight: bold;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    #runningText span {
+        display: inline-block;
+        padding-left: 100%;
+        animation: scroll 28s linear infinite;
+    }
+
+    @keyframes scroll {
+        from { transform: translateX(0); }
+        to { transform: translateX(-100%); }
+    }
+
+    /* PANEL PENGUMUMAN */
+    #announcementBox {
+        position: absolute;
+        right: 20px;
+        bottom: 80px;
+        width: 300px;
+        background: rgba(0,0,0,0.6);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 15px;
+        box-shadow: 0 0 15px rgba(0,255,200,0.3);
+    }
+
+    #announcementBox h3 {
+        margin: 0 0 10px;
+        font-size: 18px;
+        color: #00c3ff;
+    }
+
+    #announcementText {
+        font-size: 16px;
+        min-height: 50px;
+    }
+</style>
+</head>
+
+<body>
+
+<div id="mainContent">
+    <video id="video" autoplay muted playsinline src="video1.mp4" class="is-visible"></video>
+</div>
+
+<!-- OVERLAY -->
+<div class="overlay">
+    <div class="logo-wrap">
+        <img id="logo" src="logoSMA.png" alt="Logo SMA">
+    </div>
+    <div class="datetime">
+        <div id="clock"></div>
+        <div id="date"></div>
+    </div>
+</div>
+
+<!-- PENGUMUMAN -->
+<div id="announcementBox">
+    <h3>📢 Pengumuman</h3>
+    <div id="announcementText">Memuat...</div>
+</div>
+
+<!-- RUNNING TEXT -->
+<div id="runningText">
+    <span id="runningContent"> Selamat datang di SMA Islam Al Abror Metro Lampung – 
+        Mewujudkan Generasi Islami, Cerdas, dan Berprestasi • 
+        “Menuntut ilmu adalah kewajiban bagi setiap muslim” • 
+        Tetap semangat belajar • 
+        Disiplin hari ini sukses di masa depan • -- PPDB 2026/2027 Telah Dibuka!! Daftarkan diri anda sekarang juga! --- Kunjungi Website Kami: www.smaislamalabrormetro.sch.id---
+ </span>
+</div>
+
+<script>
+    // JAM + TANGGAL
+    function updateTime() {
+        const now = new Date();
+        document.getElementById("clock").innerText =
+            now.toLocaleTimeString('id-ID');
+
+        document.getElementById("date").innerText =
+            now.toLocaleDateString('id-ID', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+    }
+    updateTime();
+    setInterval(updateTime, 1000);
+
+    const video = document.getElementById("video");
+    const container = document.getElementById("mainContent");
+    const slideImage = document.createElement("img");
+    const playlist = [
+        { type: "image", src: "gambar.jpg" },
+        { type: "video", src: "video1.mp4" },
+        { type: "video", src: "video2.mp4" }
+    ];
+
+    slideImage.src = "gambar.jpg";
+    slideImage.alt = "Slide promosi sekolah";
+    container.appendChild(slideImage);
+
+    let current = 0;
+    let rotationTimer;
+    const FADE_DURATION = 1400;
+
+    function setActiveMedia(activeElement) {
+        [video, slideImage].forEach((element) => {
+            element.classList.toggle("is-visible", element === activeElement);
+        });
+    }
+
+    function queueNextSlide(duration) {
+        clearTimeout(rotationTimer);
+        rotationTimer = setTimeout(() => {
+            current = (current + 1) % playlist.length;
+            showSlide(current);
+        }, duration);
+    }
+
+    function showSlide(index) {
+        const item = playlist[index];
+
+        clearTimeout(rotationTimer);
+
+        if (item.type === "image") {
+            video.pause();
+            slideImage.src = item.src;
+            setActiveMedia(slideImage);
+
+            // Foto tampil 10 detik, lalu lanjut setelah fade selesai
+            queueNextSlide(10000 + FADE_DURATION);
+        } else {
+            video.src = item.src;
+            video.load();
+
+            const playVideo = () => {
+                setActiveMedia(video);
+                video.play().catch(() => {
+                    console.log("Video gagal diputar otomatis.");
+                });
+            };
+
+            if (video.readyState >= 2) {
+                playVideo();
+            } else {
+                video.addEventListener("loadeddata", playVideo, { once: true });
+            }
+        }
+    }
+
+   video.addEventListener("ended", () => {
+    setTimeout(() => {
+        current = (current + 1) % playlist.length;
+        showSlide(current);
+    }, 600);
+});
+    video.addEventListener("error", () => {
+        console.log("Video error!");
+    });
+
+    slideImage.addEventListener("error", () => {
+        console.log("Gambar gagal dimuat:", slideImage.src);
+    });
+
+    showSlide(current);
+    // AMBIL PENGUMUMAN DARI JSON
+    async function loadAnnouncements() {
+        try {
+            const res = await fetch("pengumuman.json");
+            const data = await res.json();
+
+            let index = 0;
+
+            function showAnnouncement() {
+                document.getElementById("announcementText").innerText = data[index];
+
+                index = (index + 1) % data.length;
+            }
+
+            showAnnouncement();
+            setInterval(showAnnouncement, 5000);
+
+        } catch (err) {
+            document.getElementById("announcementText").innerText = "Gagal load data";
+        }
+    }
+
+    loadAnnouncements();
+</script>
+
+</body>
+</html>
