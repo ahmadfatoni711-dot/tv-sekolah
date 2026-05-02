@@ -160,7 +160,9 @@
     #announcementText {
         font-size: 16px;
         min-height: 50px;
-    }
+        transition: opacity 0.5s;
+}
+
 </style>
 </head>
 
@@ -221,8 +223,9 @@
     const playlist = [
         { type: "image", src: "gambar.jpg" },
         { type: "video", src: "video1.mp4" },
-        { type: "video", src: "video2.mp4" }
-    ];
+        { type: "video", src: "video2.mp4" },
+        { type: "video", src: "video3.mp4" }
+    ];  
 
     slideImage.src = "gambar.jpg";
     slideImage.alt = "Slide promosi sekolah";
@@ -292,29 +295,55 @@
     });
 
     showSlide(current);
-    // AMBIL PENGUMUMAN DARI JSON
-    async function loadAnnouncements() {
-        try {
-            const res = await fetch("pengumuman.json");
-            const data = await res.json();
+   let announcements = [];
+let index = 0;
 
-            let index = 0;
+async function loadAnnouncements() {
+    try {
+        const res = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vTpgb0xqEqzBduLy8-UPWEjrRx-ZeR6kVOR2pvfizLeZzQJ8BKfZWFRFa-yXKAp4rLtEyyz_sOJ57jq/pub?output=csv", {
+            cache: "no-store"
+        });
 
-            function showAnnouncement() {
-                document.getElementById("announcementText").innerText = data[index];
+        const text = await res.text();
 
-                index = (index + 1) % data.length;
-            }
+        announcements = text
+            .split("\n")
+            .map(item => item.trim())
+            .filter((item, i) => item !== "" && i !== 0);
 
-            showAnnouncement();
-            setInterval(showAnnouncement, 5000);
-
-        } catch (err) {
-            document.getElementById("announcementText").innerText = "Gagal load data";
-        }
+    } catch (err) {
+        console.log(err);
+        document.getElementById("announcementText").innerText = "Gagal load data";
     }
+}
 
-    loadAnnouncements();
+function showAnnouncement() {
+    const el = document.getElementById("announcementText");
+
+    if (announcements.length > 0) {
+        el.innerText = announcements[index];
+        index = (index + 1) % announcements.length;
+    }
+}
+
+loadAnnouncements();
+setInterval(showAnnouncement, 5000);
+setInterval(loadAnnouncements, 15000);
+// Fitur Auto Refresh setiap 1 jam (3600000 milidetik)
+// Ini berguna untuk mengambil update pengumuman terbaru atau perubahan playlist
+setInterval(() => {
+    console.log("Melakukan refresh otomatis untuk memperbarui konten...");
+    location.reload();
+}, 3600000); 
+
+// Opsional: Refresh jika terjadi error fatal pada video yang macet terlalu lama
+video.addEventListener("error", () => {
+    console.log("Terdeteksi error pada video, mencoba refresh halaman...");
+    setTimeout(() => {
+        location.reload();
+    }, 5000); // Tunggu 5 detik sebelum refresh jika video error
+});
+
 </script>
 
 </body>
